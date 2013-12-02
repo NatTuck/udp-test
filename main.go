@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	var listen bool
+	var remote string
+	var local  string
 
 	flag.BoolVar(&listen, "listen", false, "Listen?")
 
