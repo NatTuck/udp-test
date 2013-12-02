@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	if connect != "" {
-		udpDial(connect)
+		udpDial(connect, "localhost:" + port)
 	} else {
 		udpListen("localhost:" + port)
 	}
@@ -50,7 +50,7 @@ func udpListen(localAddr string) {
 	}
 }
 
-func udpDial(remoteAddr string) {
+func udpDial(remoteAddr string, localAddr string) {
 	fmt.Println("Connect to", remoteAddr)
 
 	addr, err := net.ResolveUDPAddr("udp", remoteAddr)
@@ -58,7 +58,12 @@ func udpDial(remoteAddr string) {
 		panic(err)
 	}
 
-	conn, err := net.ListenUDP("udp", nil)
+	sendAddr, err := net.ResolveUDPAddr("udp", localAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	conn, err := net.ListenUDP("udp", sendAddr)
 
 	pkt := []byte("hallo")
 	nn, _, err := conn.WriteMsgUDP(pkt, nil, addr)
@@ -67,4 +72,19 @@ func udpDial(remoteAddr string) {
 	}
 
 	fmt.Println("sent bytes:", nn)
+
+	for {
+		pkt := make([]byte, 2048)
+		nn, _, flags, sadr, err := conn.ReadMsgUDP(pkt, nil)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("Got packet")
+		fmt.Println("nn    =", nn)
+		fmt.Println("flags =", flags)
+		fmt.Println("sadr  =", sadr)
+		fmt.Println("pkt   =", string(pkt))
+	}
+
 }
