@@ -7,22 +7,25 @@ import (
 )
 
 func main() {
-	var remote string
-	var local  string
+	var connect string
+	var port    string
 
-	flag.BoolVar(&listen, "listen", false, "Listen?")
+	flag.StringVar(&connect, "connect", "", "Connect to remote address.")
+	flag.StringVar(&port,    "port", "7777", "Listen on local port.")
 
 	flag.Parse()
 
-	if listen {
-		udpListen()
+	if connect != "" {
+		udpDial(connect)
 	} else {
-		udpDial()
+		udpListen("localhost:" + port)
 	}
 }
 
-func udpListen() {
-	addr, err := net.ResolveUDPAddr("udp", "localhost:7777")
+func udpListen(localAddr string) {
+	fmt.Println("Listen on", localAddr)
+
+	addr, err := net.ResolveUDPAddr("udp", localAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +36,7 @@ func udpListen() {
 	}
 
 	for {
-		pkt := make([]byte, 512)
+		pkt := make([]byte, 2048)
 		nn, _, flags, sadr, err := conn.ReadMsgUDP(pkt, nil)
 		if err != nil {
 			panic(err)
@@ -43,14 +46,14 @@ func udpListen() {
 		fmt.Println("nn    =", nn)
 		fmt.Println("flags =", flags)
 		fmt.Println("sadr  =", sadr)
-		fmt.Println("pkt   =", pkt)
-
-
+		fmt.Println("pkt   =", string(pkt))
 	}
 }
 
-func udpDial() {
-	addr, err := net.ResolveUDPAddr("udp", "localhost:7777")
+func udpDial(remoteAddr string) {
+	fmt.Println("Connect to", remoteAddr)
+
+	addr, err := net.ResolveUDPAddr("udp", remoteAddr)
 	if err != nil {
 		panic(err)
 	}
