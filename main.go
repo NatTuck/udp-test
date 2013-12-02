@@ -16,9 +16,9 @@ func main() {
 	flag.Parse()
 
 	if connect != "" {
-		udpDial(connect, "localhost:" + port)
+		udpDial(connect, ":" + port)
 	} else {
-		udpListen("localhost:" + port)
+		udpListen(":" + port)
 	}
 }
 
